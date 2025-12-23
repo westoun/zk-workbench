@@ -51,6 +51,26 @@ def on_drag_motion(event):
     widget.place(x=x, y=y)
     widget._note.position = (x, y)
 
+    render_arrows(canvas, notes)
+
+
+def render_arrows(canvas: tk.Canvas, notes: List[Note]):
+    # TODO: Conceive way to remove only affected arrows
+    # according to https://blog.finxter.com/5-best-ways-to-delete-lines-from-a-python-tkinter-canvas/
+
+    canvas.delete("arrow")
+
+    for note in notes:
+        for target_note in note.out_links:
+            canvas.create_line(
+                note.position[0],
+                note.position[1],
+                target_note.position[0],
+                target_note.position[1],
+                arrow=tk.LAST,
+                tags=("arrow",),
+            )
+
 
 if __name__ == "__main__":
 
@@ -62,6 +82,9 @@ if __name__ == "__main__":
     note3 = Note("This is note 3")
     note4 = Note("This is note 4")
     note5 = Note("This is note 5")
+
+    note1.out_links = [note2, note3]
+    note2.out_links = [note3]
 
     notes = [note1, note2, note3, note4, note5]
 
@@ -94,10 +117,13 @@ if __name__ == "__main__":
         # TODO: Add rounded edges.
         label = tk.Label(canvas, text=note.text, padx=5, pady=5, bg="red")
         label.place(x=note.position[0], y=note.position[1])
+
         label._note = note
 
         label.bind("<Button-1>", on_drag_start)
         label.bind("<B1-Motion>", on_drag_motion)
+
+    render_arrows(canvas, notes)
 
     # save results.
 
