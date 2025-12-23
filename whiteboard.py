@@ -33,7 +33,10 @@ class Whiteboard:
     notes: List[Note]
 
     def __init__(
-        self, name: str, canvas_width: float = None, canvas_height: float = None
+        self,
+        name: str,
+        canvas_width: float = None,
+        canvas_height: float = None,
     ):
         self.name = name
 
@@ -61,10 +64,12 @@ class Whiteboard:
         self.canvas_width = canvas_width
         self.canvas_height = canvas_height
 
+        self.notes = []
+
     def add_notes(self, notes: List[Note]) -> None:
         determine_positions(notes, self.canvas_width, self.canvas_height)
 
-        self.notes = notes
+        self.notes.extend(notes)
 
         for note in notes:
             # TODO: Add rounded edges.
@@ -81,10 +86,25 @@ class Whiteboard:
     @classmethod
     def load(cls, path: str) -> "Whiteboard":
         # TODO: Determine canvas width
-        pass
+        with open(path, "rb") as source_file:
+            obj = pickle.load(source_file)
+            whiteboard = Whiteboard(
+                obj["name"], obj["canvas_width"], obj["canvas_height"]
+            )
+            whiteboard.add_notes(obj["notes"])
+            return whiteboard
 
     def save(self, path: str) -> None:
-        pass
+        with open(path, "wb") as target_file:
+            pickle.dump(
+                {
+                    "name": self.name,
+                    "canvas_width": self.canvas_width,
+                    "canvas_height": self.canvas_height,
+                    "notes": self.notes,
+                },
+                target_file,
+            )
 
     def run(self) -> None:
         # TODO: Raise exception if no
