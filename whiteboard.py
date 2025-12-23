@@ -67,7 +67,8 @@ class Whiteboard:
         if name is None:
             name = "Zettelkasten Workbench"
 
-        window = tk.Tk(name)
+        window = tk.Tk(screenName=name)
+        window.title(name)
         # window.attributes('-fullscreen', True)
 
         screen_width = window.winfo_screenwidth()
@@ -81,7 +82,10 @@ class Whiteboard:
         if canvas_height is None:
             canvas_height = screen_height
 
-        canvas = tk.Canvas(window, bg="blue")
+        canvas = tk.Canvas(
+            window,
+            bg="blue",
+        )
         canvas.pack(fill="both", expand=True)
 
         self.window = window
@@ -93,12 +97,12 @@ class Whiteboard:
 
     def add_notes(self, notes: List[Note]) -> None:
         self.notes = merge_notes(self.notes, notes)
-        
+
         update_note_positions(self.notes, self.canvas_width, self.canvas_height)
 
         for note in self.notes:
             # TODO: Add rounded edges.
-            label = tk.Label(self.canvas, text=note.text, padx=5, pady=5, bg="red")
+            label = tk.Label(self.canvas, text=note.text, padx=10, pady=10, bg="red")
             label.place(x=note.position[0], y=note.position[1])
 
             label._note = note
