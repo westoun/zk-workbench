@@ -7,13 +7,35 @@ from typing import List
 from note import Note
 
 
-def determine_positions(notes: List[Note], parent_width: float, parent_height: float):
-    # TODO: Remove duplicates, then compute positions
-    # only for notes without.
+def merge_notes(old_notes: List[Note], new_notes: List[Note]) -> List[Note]:
+    merged_notes = []
 
+    for old_note in old_notes:
+
+        # Add new note, since it got more up to date
+        # linkages.
+        if old_note in new_notes:
+            new_note_index = new_notes.index(old_note)
+            new_note = new_notes[new_note_index]
+            new_note.position = old_note.position
+
+            merged_notes.append(new_note)
+        else:
+            merged_notes.append(old_note)
+
+    for new_note in new_notes:
+        if new_note not in merged_notes:
+            merged_notes.append(new_note)
+
+    return merged_notes
+
+
+def update_note_positions(notes: List[Note], parent_width: float, parent_height: float):
     # TODO: Replace with more eloquent algorithm.
 
     for note in notes:
+        # Compute positions only for notes that do not already
+        # have a position.
         if note.position is not None:
             continue
 
@@ -34,7 +56,7 @@ class Whiteboard:
 
     def __init__(
         self,
-        name: str,
+        name: str = None,
         canvas_width: float = None,
         canvas_height: float = None,
     ):
@@ -42,7 +64,10 @@ class Whiteboard:
 
         # TODO: Determine canvas width
 
-        window = tk.Tk("Zettelkasten Workbench")
+        if name is None:
+            name = "Zettelkasten Workbench"
+
+        window = tk.Tk(name)
         # window.attributes('-fullscreen', True)
 
         screen_width = window.winfo_screenwidth()
@@ -67,11 +92,11 @@ class Whiteboard:
         self.notes = []
 
     def add_notes(self, notes: List[Note]) -> None:
-        determine_positions(notes, self.canvas_width, self.canvas_height)
+        self.notes = merge_notes(self.notes, notes)
+        
+        update_note_positions(self.notes, self.canvas_width, self.canvas_height)
 
-        self.notes.extend(notes)
-
-        for note in notes:
+        for note in self.notes:
             # TODO: Add rounded edges.
             label = tk.Label(self.canvas, text=note.text, padx=5, pady=5, bg="red")
             label.place(x=note.position[0], y=note.position[1])

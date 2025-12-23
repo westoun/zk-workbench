@@ -18,3 +18,6 @@ class Note:
         self.in_links = in_links
         self.out_links = out_links
         self.position = position
+
+    def __eq__(self, comparison: "Note"):
+        return self.text == comparison.text
